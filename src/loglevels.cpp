@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
 * 2012 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
 * with no warranties. This code is yours to share, use and modify with no
 * strings attached and no restrictions or obligations.
@@ -95,15 +95,15 @@ namespace g3 {
       }
 
 
-      std::string to_string(std::map<int, g3::LoggingLevel> levelsToPrint) {
-         std::string levels;
+      TString to_string(std::map<int, g3::LoggingLevel> levelsToPrint) {
+         TString levels;
          for (auto& v : levelsToPrint) {
-            levels += "name: " + v.second.level.text + " level: " + std::to_string(v.first) + " status: " + std::to_string(v.second.status.value()) + "\n";
+            levels += G3TEXT("name: ") + v.second.level.text + G3TEXT(" level: ") + TO_STRING(v.first) + G3TEXT(" status: ") + TO_STRING(v.second.status.value()) + G3TEXT("\n");
          }
          return levels;
       }
 
-      std::string to_string() {
+      TString to_string() {
          return to_string(internal::g_log_levels);
       }
 

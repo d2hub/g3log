@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
 * 2012 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
 * with no warranties. This code is yours to share, use and modify with no
 * strings attached and no restrictions or obligations.
@@ -8,6 +8,7 @@
 
 #pragma once
 #include "g3log/generated_definitions.hpp"
+#include "g3log/tstring.hpp"
 
 // Users of Juce or other libraries might have a define DEBUG which clashes with
 // the DEBUG logging level for G3log. In that case they can instead use the define
@@ -30,11 +31,11 @@
 
 // Levels for logging, made so that it would be easy to change, remove, add levels -- KjellKod
 struct LEVELS {
-   // force internal copy of the const char*. This is a simple safeguard for when g3log is used in a
+   // force internal copy of the const g3::TCHAR*. This is a simple safeguard for when g3log is used in a
    // "dynamic, runtime loading of shared libraries"
 
    LEVELS(const LEVELS& other): value(other.value), text(other.text.c_str()) {}
-   LEVELS(int id, const std::string& idtext) : value(id), text(idtext) {}
+   LEVELS(int id, const g3::TString& idtext) : value(id), text(idtext) {}
 
    bool operator==(const LEVELS& rhs)  const {
       return (value == rhs.value && text == rhs.text);
@@ -58,7 +59,7 @@ struct LEVELS {
 
 
    int value;
-   std::string text;
+   g3::TString text;
 };
 
 // If you want to add any extra logging level then please add to your own source file the logging level you need
@@ -71,16 +72,16 @@ struct LEVELS {
 //
 // example: MyLoggingLevel.h
 // #pragma once
-//  const LEVELS MYINFO {WARNING.value +1, "MyInfoLevel"};
-//  const LEVELS MYFATAL {FATAL.value +1, "MyFatalLevel"};
+//  const LEVELS MYINFO {WARNING.value +1, G3TEXT("MyInfoLevel")};
+//  const LEVELS MYFATAL {FATAL.value +1, G3TEXT("MyFatalLevel")};
 //
 //  ... somewhere else when G3_DYNAMIC_LOGGING is enabled
 //  addLogLevel(MYINFO, true);
-//  LOG(MYINFO) << "some text";
+//  LOG(MYINFO) << G3TEXT("some text");
 //
 //  ... another example, when G3_DYNAMIC_LOGGING is enabled
 //  'addLogLevel' is NOT required
-//  LOG(MYFATL) << "this will just work, and it will be counted as a FATAL event";
+//  LOG(MYFATL) << G3TEXT("this will just work, and it will be counted as a FATAL event");
 namespace g3 {
    static const int kDebugValue = 100;
    static const int kInfoValue = 300;
@@ -90,10 +91,10 @@ namespace g3 {
 } // g3
 
 
-const LEVELS G3LOG_DEBUG{g3::kDebugValue, {"DEBUG"}},
-   INFO {g3::kInfoValue, {"INFO"}},
-   WARNING {g3::kWarningValue, {"WARNING"}},
-   FATAL {g3::kFatalValue, {"FATAL"}};
+const LEVELS G3LOG_DEBUG{g3::kDebugValue, {G3TEXT("DEBUG")}},
+   INFO {g3::kInfoValue, {G3TEXT("INFO")}},
+   WARNING {g3::kWarningValue, {G3TEXT("WARNING")}},
+   FATAL {g3::kFatalValue, {G3TEXT("FATAL")}};
 
 
 
@@ -128,9 +129,9 @@ namespace g3 {
 
 namespace g3 {
    namespace internal {
-      const LEVELS CONTRACT {g3::kInternalFatalValue, {"CONTRACT"}},
-            FATAL_SIGNAL {g3::kInternalFatalValue + 1, {"FATAL_SIGNAL"}},
-            FATAL_EXCEPTION {kInternalFatalValue + 2, {"FATAL_EXCEPTION"}};
+      const LEVELS CONTRACT {g3::kInternalFatalValue, {G3TEXT("CONTRACT")}},
+            FATAL_SIGNAL {g3::kInternalFatalValue + 1, {G3TEXT("FATAL_SIGNAL")}},
+            FATAL_EXCEPTION {kInternalFatalValue + 2, {G3TEXT("FATAL_EXCEPTION")}};
 
       /// helper function to tell the logger if a log message was fatal. If it is it will force
       /// a shutdown after all log entries are saved to the sinks
@@ -170,11 +171,11 @@ namespace g3 {
 
 
      /// print all levels with their disabled or enabled status
-     std::string to_string(std::map<int, g3::LoggingLevel> levelsToPrint);
+     TString to_string(std::map<int, g3::LoggingLevel> levelsToPrint);
 
       /// print snapshot of system levels with their
       /// disabled or enabled status
-      std::string to_string();
+      TString to_string();
 
 
       /// Snapshot view of the current logging levels' status

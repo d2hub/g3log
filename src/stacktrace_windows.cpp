@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
  * Original code made by Robert Engeln. Given as a PUBLIC DOMAIN dedication for
  * the benefit of g3log.  It was originally published at:
  * http://code-freeze.blogspot.com/2012/01/generating-stack-traces-from-c.html
@@ -32,12 +32,12 @@
 
 
 
-#define g3_MAP_PAIR_STRINGIFY(x) {x, #x}
+#define g3_MAP_PAIR_STRINGIFY(x) {x, G3TEXT(#x)}
 
 namespace {
    thread_local size_t g_thread_local_recursive_crash_check = 0;
 
-   const std::map<g3::SignalType, std::string> kExceptionsAsText = {
+   const std::map<g3::SignalType, g3::TString> kExceptionsAsText = {
       g3_MAP_PAIR_STRINGIFY(EXCEPTION_ACCESS_VIOLATION)
       , g3_MAP_PAIR_STRINGIFY(EXCEPTION_ARRAY_BOUNDS_EXCEEDED)
       , g3_MAP_PAIR_STRINGIFY(EXCEPTION_DATATYPE_MISALIGNMENT)
@@ -104,26 +104,26 @@ namespace {
 
    // extract readable text from a given stack frame. All thanks to
    // using SymFromAddr and SymGetLineFromAddr64 with the stack pointer
-   std::string getSymbolInformation(const size_t index, const std::vector<uint64_t> &frame_pointers) {
+   g3::TString getSymbolInformation(const size_t index, const std::vector<uint64_t> &frame_pointers) {
       auto addr = frame_pointers[index];
-      std::string frame_dump = "stack dump [" + std::to_string(index) + "]\t";
+      g3::TString frame_dump = G3TEXT("stack dump [") + TO_STRING(index) + G3TEXT("]\t");
 
       DWORD64 displacement64;
       DWORD displacement;
-      char symbol_buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME];
+      unsigned char symbol_buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME];
       SYMBOL_INFO *symbol = reinterpret_cast<SYMBOL_INFO *>(symbol_buffer);
       symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
       symbol->MaxNameLen = MAX_SYM_NAME;
 
       IMAGEHLP_LINE64 line;
       line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-      std::string lineInformation;
-      std::string callInformation;
+      g3::TString lineInformation;
+      g3::TString callInformation;
       if (SymFromAddr(GetCurrentProcess(), addr, &displacement64, symbol)) {
-         callInformation.append(" ").append(std::string(symbol->Name, symbol->NameLen));
+         callInformation.append(G3TEXT(" ")).append(g3::TString(symbol->Name, symbol->NameLen));
          if (SymGetLineFromAddr64(GetCurrentProcess(), addr, &displacement, &line)) {
-            lineInformation.append("\t").append(line.FileName).append(" L: ");
-            lineInformation.append(std::to_string(line.LineNumber));
+            lineInformation.append(G3TEXT("\t")).append(line.FileName).append(G3TEXT(" L: "));
+            lineInformation.append(TO_STRING(line.LineNumber));
          }
       }
       frame_dump.append(lineInformation).append(callInformation);
@@ -132,12 +132,12 @@ namespace {
 
 
    // Retrieves all the symbols for the stack frames, fills them witin a text representation and returns it
-   std::string convertFramesToText(std::vector<uint64_t> &frame_pointers) {
-      std::string dump; // slightly more efficient than ostringstream
+   g3::TString convertFramesToText(std::vector<uint64_t> &frame_pointers) {
+      g3::TString dump; // slightly more efficient than ostringstream
       const size_t kSize = frame_pointers.size();
       for (size_t index = 0; index < kSize && frame_pointers[index]; ++index) {
          dump += getSymbolInformation(index, frame_pointers);
-         dump += "\n";
+         dump += G3TEXT("\n");
       }
       return dump;
    }
@@ -147,13 +147,13 @@ namespace {
 
 
 namespace stacktrace {
-   const std::string kUnknown = {"UNKNOWN EXCEPTION"};
+   const g3::TString kUnknown = {G3TEXT("UNKNOWN EXCEPTION")};
    /// return the text description of a Windows exception code
    /// From MSDN GetExceptionCode http://msdn.microsoft.com/en-us/library/windows/desktop/ms679356(v=vs.85).aspx
-   std::string exceptionIdToText(g3::SignalType id) {
+   g3::TString exceptionIdToText(g3::SignalType id) {
       const auto iter = kExceptionsAsText.find(id);
       if ( iter == kExceptionsAsText.end()) {
-         std::string unknown = {kUnknown + ":" + std::to_string(id)};
+         g3::TString unknown = {kUnknown + G3TEXT(":") + TO_STRING(id)};
          return unknown;
       }
       return iter->second;
@@ -167,7 +167,7 @@ namespace stacktrace {
    }
 
    /// helper function: retrieve stackdump from no excisting exception pointer
-   std::string stackdump() {
+   g3::TString stackdump() {
       CONTEXT current_context;
       memset(&current_context, 0, sizeof(CONTEXT));
       RtlCaptureContext(&current_context);
@@ -175,7 +175,7 @@ namespace stacktrace {
    }
 
    /// helper function: retrieve stackdump, starting from an exception pointer
-   std::string stackdump(EXCEPTION_POINTERS *info) {
+   g3::TString stackdump(EXCEPTION_POINTERS *info) {
       auto context = info->ContextRecord;
       return stackdump(context);
 
@@ -183,11 +183,11 @@ namespace stacktrace {
 
 
    /// main stackdump function. retrieve stackdump, from the given context
-   std::string stackdump(CONTEXT *context) {
+   g3::TString stackdump(CONTEXT *context) {
 
       if (g_thread_local_recursive_crash_check >= 2) { // In Debug scenarious we allow one extra pass
-         std::string recursive_crash = {"\n\n\n***** Recursive crash detected"};
-         recursive_crash.append(", cannot continue stackdump traversal. *****\n\n\n");
+         g3::TString recursive_crash = {G3TEXT("\n\n\n***** Recursive crash detected")};
+         recursive_crash.append(G3TEXT(", cannot continue stackdump traversal. *****\n\n\n"));
          return recursive_crash;
       }
       ++g_thread_local_recursive_crash_check;
@@ -198,7 +198,7 @@ namespace stacktrace {
          const BOOL kLoadSymModules = TRUE;
          const auto initialized = SymInitialize(GetCurrentProcess(), nullptr, kLoadSymModules);
          if (TRUE != initialized) {
-            return { "Error: Cannot call SymInitialize(...) for retrieving symbols in stack" };
+            return { G3TEXT("Error: Cannot call SymInitialize(...) for retrieving symbols in stack") };
          }
 
          std::shared_ptr<void> RaiiSymCleaner(nullptr, [&](void *) {

@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
  * 2011 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
  * with no warranties. This code is yours to share, use and modify with no
  * strings attached and no restrictions or obligations.
@@ -64,12 +64,12 @@ namespace g3 {
       });
       std::lock_guard<std::mutex> lock(g_logging_init_mutex);
       if (internal::isLoggingInitialized() || nullptr == bgworker) {
-         std::ostringstream exitMsg;
-         exitMsg << __FILE__ "->" << __FUNCTION__ << ":" << __LINE__ << std::endl;
-         exitMsg << "\tFatal exit due to illegal initialization of g3::LogWorker\n";
-         exitMsg << "\t(due to multiple initializations? : " << std::boolalpha << internal::isLoggingInitialized();
-         exitMsg << ", due to nullptr == bgworker? : " << std::boolalpha << (nullptr == bgworker) << ")";
-         std::cerr << exitMsg.str() << std::endl;
+         g3::OTStringStream exitMsg;
+         exitMsg << G3TEXT(__FILE__) G3TEXT("->") << G3TEXT(__FUNCTION__) << G3TEXT(":") << __LINE__ << std::endl;
+         exitMsg << G3TEXT("\tFatal exit due to illegal initialization of g3::LogWorker\n");
+         exitMsg << G3TEXT("\t(due to multiple initializations? : ") << std::boolalpha << internal::isLoggingInitialized();
+         exitMsg << G3TEXT(", due to nullptr == bgworker? : ") << std::boolalpha << (nullptr == bgworker) << G3TEXT(")");
+         tcerr << exitMsg.str() << std::endl;
          std::exit(EXIT_FAILURE);
       }
 
@@ -140,10 +140,10 @@ namespace g3 {
        */
       bool shutDownLoggingForActiveOnly(LogWorker* active) {
          if (isLoggingInitialized() && nullptr != active && (active != g_logger_instance)) {
-            LOG(WARNING) << "\n\t\tAttempted to shut down logging, but the ID of the Logger is not the one that is active."
-                         << "\n\t\tHaving multiple instances of the g3::LogWorker is likely a BUG"
-                         << "\n\t\tEither way, this call to shutDownLogging was ignored"
-                         << "\n\t\tTry g3::internal::shutDownLogging() instead";
+            LOG(WARNING) << G3TEXT("\n\t\tAttempted to shut down logging, but the ID of the Logger is not the one that is active.")
+                         << G3TEXT("\n\t\tHaving multiple instances of the g3::LogWorker is likely a BUG")
+                         << G3TEXT("\n\t\tEither way, this call to shutDownLogging was ignored")
+                         << G3TEXT("\n\t\tTry g3::internal::shutDownLogging() instead");
             return false;
          }
          shutDownLogging();
@@ -155,8 +155,8 @@ namespace g3 {
 
       /** explicits copy of all input. This is makes it possibly to use g3log across dynamically loaded libraries
       * i.e. (dlopen + dlsym)  */
-      void saveMessage(const char* entry, const char* file, int line, const char* function, const LEVELS& level,
-                       const char* boolean_expression, int fatal_signal, const char* stack_trace) {
+      void saveMessage(const g3::TCHAR* entry, const g3::TCHAR* file, int line, const g3::TCHAR* function, const LEVELS& level,
+                       const g3::TCHAR* boolean_expression, int fatal_signal, const g3::TCHAR* stack_trace) {
          LEVELS msgLevel {level};
          LogMessagePtr message {std::make_unique<LogMessage>(file, line, function, msgLevel)};
          message.get()->write().append(entry);
@@ -172,15 +172,15 @@ namespace g3 {
             // "benign" race here. If two threads crashes, with recursive crashes
             // then it's possible that the "other" fatal stack trace will be shown
             // that's OK since it was anyhow the first crash detected
-            static const std::string first_stack_trace = stack_trace;
+            static const TString first_stack_trace = stack_trace;
             fatalhook();
             message.get()->write().append(stack_trace);
 
             if (g_fatal_hook_recursive_counter.load() > 1) {
                message.get()->write()
-               .append("\n\n\nWARNING\n"
-                       "A recursive crash detected. It is likely the hook set with 'setFatalPreLoggingHook(...)' is responsible\n\n")
-               .append("---First crash stacktrace: ").append(first_stack_trace).append("\n---End of first stacktrace\n");
+               .append(G3TEXT("\n\n\nWARNING\n")
+                       G3TEXT("A recursive crash detected. It is likely the hook set with 'setFatalPreLoggingHook(...)' is responsible\n\n"))
+               .append(G3TEXT("---First crash stacktrace: ")).append(first_stack_trace).append(G3TEXT("\n---End of first stacktrace\n"));
             }
             FatalMessagePtr fatal_message { std::make_unique<FatalMessage>(*(message._move_only.get()), fatal_signal) };
             // At destruction, flushes fatal message to g3LogWorker
@@ -206,12 +206,12 @@ namespace g3 {
          if (!internal::isLoggingInitialized()) {
             std::call_once(g_set_first_uninitialized_flag, [&] {
                g_first_unintialized_msg = incoming.release();
-               std::string err = {"LOGGER NOT INITIALIZED:\n\t\t"};
+               TString err = {G3TEXT("LOGGER NOT INITIALIZED:\n\t\t")};
                err.append(g_first_unintialized_msg->message());
-               std::string& str = g_first_unintialized_msg->write();
+               TString& str = g_first_unintialized_msg->write();
                str.clear();
                str.append(err); // replace content
-               std::cerr << str << std::endl;
+               tcerr << str << std::endl;
             });
             return;
          }
@@ -227,11 +227,11 @@ namespace g3 {
        */
       void pushFatalMessageToLogger(FatalMessagePtr message) {
          if (!isLoggingInitialized()) {
-            std::ostringstream error;
-            error << "FATAL CALL but logger is NOT initialized\n"
-                  << "CAUSE: " << message.get()->reason()
-                  << "\nMessage: \n" << message.get()->toString() << std::flush;
-            std::cerr << error.str() << std::flush;
+            g3::OTStringStream error;
+            error << G3TEXT("FATAL CALL but logger is NOT initialized\n")
+                  << G3TEXT("CAUSE: ") << message.get()->reason()
+                  << G3TEXT("\nMessage: \n") << message.get()->toString() << std::flush;
+            tcerr << error.str() << std::flush;
             internal::exitWithDefaultSignalHandler(message.get()->_level, message.get()->_signal_id);
          }
          g_logger_instance->fatal(message);

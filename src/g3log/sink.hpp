@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
 * 2013 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
 * with no warranties. This code is yours to share, use and modify with no
 * strings attached and no restrictions or obligations.
@@ -49,11 +49,11 @@ namespace g3 {
          }
 
 
-         Sink(std::unique_ptr<T> sink, void(T::*Call)(std::string) )
+         Sink(std::unique_ptr<T> sink, void(T::*Call)(TString) )
             : SinkWrapper(),
          _real_sink {std::move(sink)},
          _bg(kjellkod::Active::createActive()) {
-            std::function<void(std::string)> adapter = std::bind(Call, _real_sink.get(), std::placeholders::_1);
+            std::function<void(TString)> adapter = std::bind(Call, _real_sink.get(), std::placeholders::_1);
             _default_log_call = [ = ](LogMessageMover m) {
                adapter(m.get().toString());
             };

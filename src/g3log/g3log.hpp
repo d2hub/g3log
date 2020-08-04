@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
  * 2011 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
  * with no warranties. This code is yours to share, use and modify with no
  * strings attached and no restrictions or obligations.
@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "g3log/tstring.hpp"
 #include "g3log/loglevels.hpp"
 #include "g3log/logcapture.hpp"
 #include "g3log/logmessage.hpp"
@@ -104,8 +105,8 @@ namespace g3 {
       bool isLoggingInitialized();
 
       // Save the created LogMessage to any existing sinks
-      void saveMessage(const char *message, const char *file, int line, const char *function, const LEVELS &level,
-                       const char *boolean_expression, int fatal_signal, const char *stack_trace);
+      void saveMessage(const g3::TCHAR *message, const g3::TCHAR *file, int line, const g3::TCHAR *function, const LEVELS &level,
+                       const g3::TCHAR *boolean_expression, int fatal_signal, const g3::TCHAR *stack_trace);
 
       // forwards the message to all sinks
       void pushMessageToLogger(LogMessagePtr log_entry);
@@ -138,10 +139,10 @@ namespace g3 {
    } // internal
 } // g3
 
-#define INTERNAL_LOG_MESSAGE(level) LogCapture(__FILE__, __LINE__, static_cast<const char*>(__PRETTY_FUNCTION__), level)
+#define INTERNAL_LOG_MESSAGE(level) LogCapture(G3TEXT(__FILE__), __LINE__, static_cast<const g3::TCHAR*>(G3TEXT(__PRETTY_FUNCTION__)), level)
 
 #define INTERNAL_CONTRACT_MESSAGE(boolean_expression)  \
-   LogCapture(__FILE__, __LINE__, __PRETTY_FUNCTION__, g3::internal::CONTRACT, boolean_expression)
+   LogCapture(G3TEXT(__FILE__), __LINE__, G3TEXT(__PRETTY_FUNCTION__), g3::internal::CONTRACT, boolean_expression)
 
 
 // LOG(level) is the API for the stream log
@@ -155,7 +156,7 @@ namespace g3 {
 // 'Design By Contract' stream API. Broken Contracts will exit the application by using fatal signal SIGABRT
 //  For unit testing, you can override the fatal handling using setFatalExitHandler(...). See tes_io.cpp for examples
 #define CHECK(boolean_expression)        \
-   if (true == (boolean_expression)) {} else INTERNAL_CONTRACT_MESSAGE(#boolean_expression).stream()
+   if (true == (boolean_expression)) {} else INTERNAL_CONTRACT_MESSAGE(G3TEXT(#boolean_expression)).stream()
 
 
 /** For details please see this
@@ -187,14 +188,14 @@ namespace g3 {
 For flags, width, precision etc please see the above references.
 EXAMPLES:
 {
-   LOGF(INFO, "Characters: %c %c \n", 'a', 65);
-   LOGF(INFO, "Decimals: %d %ld\n", 1977, 650000L);      // printing long
-   LOGF(INFO, "Preceding with blanks: %10d \n", 1977);
-   LOGF(INFO, "Preceding with zeros: %010d \n", 1977);
-   LOGF(INFO, "Some different radixes: %d %x %o %#x %#o \n", 100, 100, 100, 100, 100);
-   LOGF(INFO, "floats: %4.2f %+.0e %E \n", 3.1416, 3.1416, 3.1416);
-   LOGF(INFO, "Width trick: %*d \n", 5, 10);
-   LOGF(INFO, "%s \n", "A string");
+   LOGF(INFO, G3TEXT("Characters: %c %c \n"), G3TEXT('a'), 65);
+   LOGF(INFO, G3TEXT("Decimals: %d %ld\n"), 1977, 650000L);      // printing long
+   LOGF(INFO, G3TEXT("Preceding with blanks: %10d \n"), 1977);
+   LOGF(INFO, G3TEXT("Preceding with zeros: %010d \n"), 1977);
+   LOGF(INFO, G3TEXT("Some different radixes: %d %x %o %#x %#o \n"), 100, 100, 100, 100, 100);
+   LOGF(INFO, G3TEXT("floats: %4.2f %+.0e %E \n"), 3.1416, 3.1416, 3.1416);
+   LOGF(INFO, G3TEXT("Width trick: %*d \n"), 5, 10);
+   LOGF(INFO, G3TEXT("%s \n"), G3TEXT("A string"));
    return 0;
 }
 And here is possible output
@@ -217,11 +218,11 @@ And here is possible output
 // Calls the signal handler if the contract failed with the default exit for a failed contract. This is typically SIGABRT
 // See g3log, setFatalExitHandler(...) which can be overriden for unit tests (ref test_io.cpp)
 #define CHECKF(boolean_expression, printf_like_message, ...)    \
-   if (true == (boolean_expression)) {} else INTERNAL_CONTRACT_MESSAGE(#boolean_expression).capturef(printf_like_message, ##__VA_ARGS__)
+   if (true == (boolean_expression)) {} else INTERNAL_CONTRACT_MESSAGE(G3TEXT(#boolean_expression)).capturef(printf_like_message, ##__VA_ARGS__)
 
 // Backwards compatible. The same as CHECKF.
 // Design By Contract, printf-like API syntax with variadic input parameters.
 // Calls the signal handler if the contract failed. See g3log, setFatalExitHandler(...) which can be overriden for unit tests
 // (ref test_io.cpp)
 #define CHECK_F(boolean_expression, printf_like_message, ...)    \
-   if (true == (boolean_expression)) {} else INTERNAL_CONTRACT_MESSAGE(#boolean_expression).capturef(printf_like_message, ##__VA_ARGS__)
+   if (true == (boolean_expression)) {} else INTERNAL_CONTRACT_MESSAGE(G3TEXT(#boolean_expression)).capturef(printf_like_message, ##__VA_ARGS__)

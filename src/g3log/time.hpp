@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 /** ==========================================================================
 * 2012 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
 * with no warranties. This code is yours to share, use and modify with no
@@ -13,13 +13,15 @@
 * PUBLIC DOMAIN and Not under copywrite protection. First published for g3log at KjellKod.cc
 * ********************************************* */
 
+#include "g3log/tstring.hpp"
+
 #include <ctime>
 #include <string>
 #include <chrono>
 
 // FYI:
 // namespace g3::internal ONLY in g3time.cpp
-//          std::string put_time(const struct tm* tmb, const char* c_time_format)
+//          TString put_time(const struct tm* tmb, const g3::TCHAR* c_time_format)
 
 namespace g3 {
    typedef std::chrono::time_point<std::chrono::system_clock> system_time_point;
@@ -29,22 +31,22 @@ namespace g3 {
 
    namespace internal {
       enum class Fractional {Millisecond, Microsecond, Nanosecond, NanosecondDefault};
-      Fractional getFractional(const std::string& format_buffer, size_t pos);
-      std::string to_string(const g3::system_time_point& ts, Fractional fractional);
-      std::string localtime_formatted_fractions(const g3::system_time_point& ts, std::string format_buffer);
-      static const std::string date_formatted = "%Y/%m/%d";
+      Fractional getFractional(const TString& format_buffer, size_t pos);
+      TString to_string(const g3::system_time_point& ts, Fractional fractional);
+      TString localtime_formatted_fractions(const g3::system_time_point& ts, TString format_buffer);
+      static const TString date_formatted = G3TEXT("%Y/%m/%d");
       // %f: fractions of seconds (%f is nanoseconds)
       // %f3: milliseconds, 3 digits: 001
       // %6: microseconds: 6 digits: 000001  --- default for the time_format
       // %f9, %f: nanoseconds, 9 digits: 000000001
-      static const std::string time_formatted = "%H:%M:%S %f6";
+      static const TString time_formatted = G3TEXT("%H:%M:%S %f6");
    } // internal
 
 
    // This mimics the original "std::put_time(const std::tm* tmb, const charT* fmt)"
    // This is needed since latest version (at time of writing) of gcc4.7 does not implement this library function yet.
-   // return value is SIMPLIFIED to only return a std::string
-   std::string put_time(const struct tm* tmb, const char* c_time_format);
+   // return value is SIMPLIFIED to only return a TString
+   TString put_time(const struct tm* tmb, const g3::TCHAR* c_time_format);
 
    /** return time representing POD struct (ref ctime + wchar) that is normally
    * retrieved with std::localtime. g3::localtime is threadsafe which std::localtime is not.
@@ -55,7 +57,7 @@ namespace g3 {
    * WARNING: At time of writing there is only so-so compiler support for
    * std::put_time. A possible fix if your c++11 library is not updated is to
    * modify this to use std::strftime instead */
-   std::string localtime_formatted(const system_time_point& ts, const std::string& time_format) ;
+   TString localtime_formatted(const system_time_point& ts, const TString& time_format) ;
 
    inline system_time_point to_system_time(const high_resolution_time_point& ts)
    {

@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
 * 2012 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
 * with no warranties. This code is yours to share, use and modify with no
 * strings attached and no restrictions or obligations.
@@ -21,16 +21,16 @@
 
 namespace g3 {
    namespace internal {
-      const std::string kFractionalIdentier   = "%f";
+      const TString kFractionalIdentier   = G3TEXT("%f");
       const size_t kFractionalIdentierSize = 2;
 
-      Fractional getFractional(const std::string& format_buffer, size_t pos) {
-         char  ch  = (format_buffer.size() > pos + kFractionalIdentierSize ? format_buffer.at(pos + kFractionalIdentierSize) : '\0');
+      Fractional getFractional(const TString& format_buffer, size_t pos) {
+         g3::TCHAR  ch  = (format_buffer.size() > pos + kFractionalIdentierSize ? format_buffer.at(pos + kFractionalIdentierSize) : G3TEXT('\0'));
          Fractional type = Fractional::NanosecondDefault;
          switch (ch) {
-            case '3': type = Fractional::Millisecond; break;
-            case '6': type = Fractional::Microsecond; break;
-            case '9': type = Fractional::Nanosecond; break;
+            case G3TEXT('3'): type = Fractional::Millisecond; break;
+            case G3TEXT('6'): type = Fractional::Microsecond; break;
+            case G3TEXT('9'): type = Fractional::Nanosecond; break;
             default: type = Fractional::NanosecondDefault; break;
          }
          return type;
@@ -40,7 +40,7 @@ namespace g3 {
       // 1 ms --> 001
       // 1 us --> 000001
       // 1 ns --> 000000001
-      std::string to_string(const g3::system_time_point& ts, Fractional fractional) {
+      TString to_string(const g3::system_time_point& ts, Fractional fractional) {
          auto duration = ts.time_since_epoch();
          auto sec_duration = std::chrono::duration_cast<std::chrono::seconds>(duration);
          duration -= sec_duration;
@@ -68,15 +68,15 @@ namespace g3 {
          }
 
          ns /= digitsToCut;
-         auto value = std::string(std::to_string(ns));
-         return std::string(zeroes - value.size(), '0') + value;
+         auto value = TString(TO_STRING(ns));
+         return TString(zeroes - value.size(), G3TEXT('0')) + value;
       }
 
-      std::string localtime_formatted_fractions(const g3::system_time_point& ts, std::string format_buffer) {
+      TString localtime_formatted_fractions(const g3::system_time_point& ts, TString format_buffer) {
          // iterating through every "%f" instance in the format string
          auto identifierExtraSize = 0;
          for (size_t pos = 0;
-               (pos = format_buffer.find(g3::internal::kFractionalIdentier, pos)) != std::string::npos;
+               (pos = format_buffer.find(g3::internal::kFractionalIdentier, pos)) != TString::npos;
                pos += g3::internal::kFractionalIdentierSize + identifierExtraSize) {
             // figuring out whether this is nano, micro or milli identifier
             auto type = g3::internal::getFractional(format_buffer, pos);
@@ -100,11 +100,11 @@ namespace g3 {
 namespace g3 {
    // This mimics the original "std::put_time(const std::tm* tmb, const charT* fmt)"
    // This is needed since latest version (at time of writing) of gcc4.7 does not implement this library function yet.
-   // return value is SIMPLIFIED to only return a std::string
-   std::string put_time(const struct tm* tmb, const char* c_time_format) {
+   // return value is SIMPLIFIED to only return a TString
+   TString put_time(const struct tm* tmb, const g3::TCHAR* c_time_format) {
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__)) && !defined(__MINGW32__)
-      std::ostringstream oss;
-      oss.fill('0');
+      g3::OTStringStream oss;
+      oss.fill(G3TEXT('0'));
       // BOGUS hack done for VS2012: C++11 non-conformant since it SHOULD take a "const struct tm*  "
       oss << std::put_time(const_cast<struct tm*> (tmb), c_time_format);
       return oss.str();
@@ -140,7 +140,7 @@ namespace g3 {
    }
 
 
-   std::string localtime_formatted(const g3::system_time_point& ts, const std::string& time_format) {
+   TString localtime_formatted(const g3::system_time_point& ts, const TString& time_format) {
       auto format_buffer = internal::localtime_formatted_fractions(ts, time_format);
       auto time_point = std::chrono::system_clock::to_time_t(ts);
       std::tm t = localtime(time_point);

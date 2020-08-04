@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 /** ==========================================================================
 * 2012 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
 * with no warranties. This code is yours to share, use and modify with no
@@ -39,7 +39,7 @@ namespace g3 {
    // Example usage:
    //  std::unique_ptr<Active> bgWorker{Active::createActive()};
    //  ...
-   //  auto msg_call=[=](){return ("Hello from the Background");};
+   //  auto msg_call=[=](){return (G3TEXT("Hello from the Background"));};
    //  auto future_msg = g3::spawn_task(msg_lambda, bgWorker.get());
    template <typename Func, class BgWorker>
    std::future<typename std::result_of<Func()>::type> spawn_task(Func func, BgWorker *worker)

@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
  * 2014 by KjellKod.cc AND Robert Engeln.
  * The stacktrace code was given as a public domain dedication by Robert Engeln
  * It was originally published at: http://code-freeze.blogspot.com/2012/01/generating-stack-traces-from-c.html
@@ -24,19 +24,19 @@
 
 namespace stacktrace {
    /// return the text description of a Windows exception code
-   std::string exceptionIdToText(g3::SignalType id);
+   g3::TString exceptionIdToText(g3::SignalType id);
 
    /// return whether or not the exception is a known exception, i.e.
    /// an exception that we should treat as a fatal event
    bool isKnownException(g3::SignalType id);
 
    /// helper function: retrieve stackdump from no excisting exception pointer
-   std::string stackdump();
+   g3::TString stackdump();
 
    /// helper function: retrieve stackdump, starting from an exception pointer
-   std::string stackdump(EXCEPTION_POINTERS *info);
+   g3::TString stackdump(EXCEPTION_POINTERS *info);
 
    /// main stackdump function. retrieve stackdump, from the given context
-   std::string stackdump(CONTEXT *context);
+   g3::TString stackdump(CONTEXT *context);
 
 } // stacktrace

@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
 * 2011 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
 * with no warranties. This code is yours to share, use and modify with no
 * strings attached and no restrictions or obligations.
@@ -28,9 +28,9 @@ namespace g3 {
       }
 
       if (_sinks.empty()) {
-         std::string err_msg {"g3logworker has no sinks. Message: ["};
-         err_msg.append(uniqueMsg.get()->toString()).append("]\n");
-         std::cerr << err_msg;
+         TString err_msg {G3TEXT("g3logworker has no sinks. Message: [")};
+         err_msg.append(uniqueMsg.get()->toString()).append(G3TEXT("]\n"));
+         tcerr << err_msg;
       }
    }
 
@@ -39,22 +39,22 @@ namespace g3 {
       // safe to shutdown logging now
       g3::internal::shutDownLogging();
 
-      std::string reason = msgPtr.get()->reason();
+      TString reason = msgPtr.get()->reason();
       const auto level = msgPtr.get()->_level;
       const auto fatal_id = msgPtr.get()->_signal_id;
 
 
       std::unique_ptr<LogMessage> uniqueMsg(std::move(msgPtr.get()));
-      uniqueMsg->write().append("\nExiting after fatal event  (").append(uniqueMsg->level());
+      uniqueMsg->write().append(G3TEXT("\nExiting after fatal event  (")).append(uniqueMsg->level());
 
 
       // Change output in case of a fatal signal (or windows exception)
-      std::string exiting = {"Fatal type: "};
+      TString exiting = {G3TEXT("Fatal type: ")};
 
-      uniqueMsg->write().append("). ").append(exiting).append(" ").append(reason)
-      .append("\nLog content flushed sucessfully to sink\n\n");
+      uniqueMsg->write().append(G3TEXT("). ")).append(exiting).append(G3TEXT(" ")).append(reason)
+      .append(G3TEXT("\nLog content flushed sucessfully to sink\n\n"));
 
-      std::cerr << uniqueMsg->toString() << std::flush;
+      tcerr << uniqueMsg->toString() << std::flush;
       for (auto& sink : _sinks) {
          LogMessage msg(*(uniqueMsg));
          sink->send(LogMessageMover(std::move(msg)));
@@ -120,7 +120,7 @@ namespace g3 {
       return std::unique_ptr<LogWorker>(new LogWorker);
    }
 
-   std::unique_ptr<FileSinkHandle>LogWorker::addDefaultLogger(const std::string& log_prefix, const std::string& log_directory, const std::string& default_id) {
+   std::unique_ptr<FileSinkHandle>LogWorker::addDefaultLogger(const TString& log_prefix, const TString& log_directory, const TString& default_id) {
       return addSink(std::make_unique<g3::FileSink>(log_prefix, log_directory, default_id), &FileSink::fileWrite);
    }
 

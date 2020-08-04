@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
  * 2013 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
  * with no warranties. This code is yours to share, use and modify with no
  * strings attached and no restrictions or obligations.
@@ -46,7 +46,7 @@ LogCapture::~LogCapture() noexcept (false) {
 
 
 /// Called from crash handler when a fatal signal has occurred (SIGSEGV etc)
-LogCapture::LogCapture(const LEVELS &level, g3::SignalType fatal_signal, const char *dump) : LogCapture("", 0, "", level, "", fatal_signal, dump) {
+LogCapture::LogCapture(const LEVELS &level, g3::SignalType fatal_signal, const g3::TCHAR *dump) : LogCapture(G3TEXT(""), 0, G3TEXT(""), level, G3TEXT(""), fatal_signal, dump) {
 }
 
 /**
@@ -55,12 +55,12 @@ LogCapture::LogCapture(const LEVELS &level, g3::SignalType fatal_signal, const c
  * @expression for CHECK calls
  * @fatal_signal for failed CHECK:SIGABRT or fatal signal caught in the signal handler
  */
-LogCapture::LogCapture(const char *file, const int line, const char *function, const LEVELS &level,
-                       const char *expression, g3::SignalType fatal_signal, const char *dump)
+LogCapture::LogCapture(const g3::TCHAR *file, const int line, const g3::TCHAR *function, const LEVELS &level,
+                       const g3::TCHAR *expression, g3::SignalType fatal_signal, const g3::TCHAR *dump)
    : _file(file), _line(line), _function(function), _level(level), _expression(expression), _fatal_signal(fatal_signal) {
 
    if (g3::internal::wasFatal(level)) {
-      _stack_trace = std::string{"\n*******\tSTACKDUMP *******\n"};
+      _stack_trace = g3::TString{G3TEXT("\n*******\tSTACKDUMP *******\n")};
       _stack_trace.append(g3::internal::stackdump(dump));
    }
 }
@@ -71,15 +71,15 @@ LogCapture::LogCapture(const char *file, const int line, const char *function, c
 * capturef, used for "printf" like API in CHECKF, LOGF, LOGF_IF
 * See also for the attribute formatting ref:  http://www.codemaestro.com/reviews/18
 */
-void LogCapture::capturef(const char *printf_like_message, ...) {
-   static const std::string kTruncatedWarningText = "[...truncated...]";
+void LogCapture::capturef(const g3::TCHAR *printf_like_message, ...) {
+   static const g3::TString kTruncatedWarningText = G3TEXT("[...truncated...]");
 #ifdef G3_DYNAMIC_MAX_MESSAGE_SIZE
-   std::vector<char> finished_message_backing(MaxMessageSize);
-   char *finished_message = finished_message_backing.data();
+   std::vector<g3::TCHAR> finished_message_backing(MaxMessageSize);
+   g3::TCHAR *finished_message = finished_message_backing.data();
    auto finished_message_len = MaxMessageSize;
 #else
    static const int kMaxMessageSize = 2048;
-   char finished_message[kMaxMessageSize];
+   g3::TCHAR finished_message[kMaxMessageSize];
 #if ((defined(WIN32) || defined(_WIN32) || defined(__WIN32__)) && !defined(__GNUC__))
    auto finished_message_len = _countof(finished_message);
 #else
@@ -91,15 +91,15 @@ void LogCapture::capturef(const char *printf_like_message, ...) {
    va_start(arglist, printf_like_message);
 
 #if ((defined(WIN32) || defined(_WIN32) || defined(__WIN32__)) && !defined(__GNUC__))
-   const int nbrcharacters = vsnprintf_s(finished_message, finished_message_len, _TRUNCATE, printf_like_message, arglist);
+   const int nbrcharacters = _vsntprintf_s(finished_message, finished_message_len, _TRUNCATE, printf_like_message, arglist);
 #else
    const int nbrcharacters = vsnprintf(finished_message, finished_message_len, printf_like_message, arglist);
 #endif
    va_end(arglist);
 
    if (nbrcharacters <= 0) {
-      stream() << "\n\tERROR LOG MSG NOTIFICATION: Failure to successfully parse the message";
-      stream() << '"' << printf_like_message << '"' << std::endl;
+      stream() << G3TEXT("\n\tERROR LOG MSG NOTIFICATION: Failure to successfully parse the message");
+      stream() << G3TEXT('"') << printf_like_message << G3TEXT('"') << std::endl;
    } else if (nbrcharacters > finished_message_len) {
       stream() << finished_message << kTruncatedWarningText;
    } else {

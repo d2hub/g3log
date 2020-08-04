@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
  * 2011 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
  * with no warranties. This code is yours to share, use and modify with no
  * strings attached and no restrictions or obligations.
@@ -67,11 +67,11 @@ namespace {
    // called for fatal signals SIGABRT, SIGFPE, SIGSEGV, SIGILL, SIGTERM
    void signalHandler(int signal_number) {
       using namespace g3::internal;
-      std::string dump = stacktrace::stackdump();
+      g3::TString dump = stacktrace::stackdump();
 
-      std::ostringstream fatal_stream;
-      fatal_stream << "\n***** Received fatal signal " << g3::internal::exitReasonName(g3::internal::FATAL_SIGNAL, signal_number);
-      fatal_stream << "(" << signal_number << ")\tPID: " << getpid() << std::endl;
+      g3::OTStringStream fatal_stream;
+      fatal_stream << G3TEXT("\n***** Received fatal signal ") << g3::internal::exitReasonName(g3::internal::FATAL_SIGNAL, signal_number);
+      fatal_stream << G3TEXT("(") << signal_number << G3TEXT(")\tPID: ") << getpid() << std::endl;
 
 
       LogCapture trigger(FATAL_SIGNAL, static_cast<g3::SignalType>(signal_number), dump.c_str());
@@ -92,13 +92,13 @@ namespace {
 
 
    // Unhandled exception catching
-   LONG WINAPI exceptionHandling(EXCEPTION_POINTERS *info, const std::string &handler) {
-      std::string dump = stacktrace::stackdump(info);
+   LONG WINAPI exceptionHandling(EXCEPTION_POINTERS *info, const g3::TString &handler) {
+      g3::TString dump = stacktrace::stackdump(info);
 
-      std::ostringstream fatal_stream;
+      g3::OTStringStream fatal_stream;
       const g3::SignalType exception_code = info->ExceptionRecord->ExceptionCode;
-      fatal_stream << "\n***** " << handler << ": Received fatal exception " << g3::internal::exitReasonName(g3::internal::FATAL_EXCEPTION, exception_code);
-      fatal_stream << "\tPID: " << getpid() << std::endl;
+      fatal_stream << G3TEXT("\n***** ") << handler << G3TEXT(": Received fatal exception ") << g3::internal::exitReasonName(g3::internal::FATAL_EXCEPTION, exception_code);
+      fatal_stream << G3TEXT("\tPID: ") << getpid() << std::endl;
 
       const auto fatal_id = static_cast<g3::SignalType>(exception_code);
       LogCapture trigger(g3::internal::FATAL_EXCEPTION, fatal_id, dump.c_str());
@@ -116,7 +116,7 @@ namespace {
    // Unhandled exception catching
    LONG WINAPI unexpectedExceptionHandling(EXCEPTION_POINTERS *info) {
       ReverseToOriginalFatalHandling();
-      return exceptionHandling(info, "Unexpected Exception Handler");
+      return exceptionHandling(info, G3TEXT("Unexpected Exception Handler"));
    }
 
 
@@ -132,7 +132,7 @@ namespace {
          return EXCEPTION_CONTINUE_SEARCH;
       } else {
          ReverseToOriginalFatalHandling();
-         return exceptionHandling(p, "Vectored Exception Handler");
+         return exceptionHandling(p, G3TEXT("Vectored Exception Handler"));
       }
    }
 #endif
@@ -155,8 +155,8 @@ namespace g3 {
       /// Generate stackdump. Or in case a stackdump was pre-generated and
       /// non-empty just use that one.   i.e. the latter case is only for
       /// Windows and test purposes
-      std::string stackdump(const char *dump) {
-         if (nullptr != dump && !std::string(dump).empty()) {
+      TString stackdump(const g3::TCHAR *dump) {
+         if (nullptr != dump && !TString(dump).empty()) {
             return {dump};
          }
 
@@ -166,20 +166,20 @@ namespace g3 {
 
 
       /// string representation of signal ID or Windows exception id
-      std::string exitReasonName(const LEVELS &level, g3::SignalType fatal_id) {
+      TString exitReasonName(const LEVELS &level, g3::SignalType fatal_id) {
          if (level == g3::internal::FATAL_EXCEPTION) {
             return stacktrace::exceptionIdToText(fatal_id);
          }
 
          switch (fatal_id) {
-         case SIGABRT: return "SIGABRT"; break;
-         case SIGFPE: return "SIGFPE"; break;
-         case SIGSEGV: return "SIGSEGV"; break;
-         case SIGILL: return "SIGILL"; break;
-         case SIGTERM: return "SIGTERM"; break;
+         case SIGABRT: return G3TEXT("SIGABRT"); break;
+         case SIGFPE: return G3TEXT("SIGFPE"); break;
+         case SIGSEGV: return G3TEXT("SIGSEGV"); break;
+         case SIGILL: return G3TEXT("SIGILL"); break;
+         case SIGTERM: return G3TEXT("SIGTERM"); break;
          default:
-            std::ostringstream oss;
-            oss << "UNKNOWN SIGNAL(" << fatal_id << ")";
+            g3::OTStringStream oss;
+            oss << G3TEXT("UNKNOWN SIGNAL(") << fatal_id << G3TEXT(")");
             return oss.str();
          }
       }

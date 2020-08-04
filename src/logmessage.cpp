@@ -1,4 +1,4 @@
-/** ==========================================================================
+﻿/** ==========================================================================
 * 2012 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
 * with no warranties. This code is yours to share, use and modify with no
 * strings attached and no restrictions or obligations.
@@ -16,82 +16,82 @@
 
 namespace g3 {
 
-   std::string LogMessage::splitFileName(const std::string& str) {
+   TString LogMessage::splitFileName(const TString& str) {
       size_t found;
-      found = str.find_last_of("(/\\");
+      found = str.find_last_of(G3TEXT("(/\\"));
       return str.substr(found + 1);
    }
 
 
    // helper for fatal signal
-   std::string  LogMessage::fatalSignalToString(const LogMessage& msg) {
-      std::string out; // clear any previous text and formatting
+   TString  LogMessage::fatalSignalToString(const LogMessage& msg) {
+      TString out; // clear any previous text and formatting
       out.append(msg.timestamp()
-                 + "\n\n***** FATAL SIGNAL RECEIVED ******* \n"
-                 + msg.message() + '\n');
+                 + G3TEXT("\n\n***** FATAL SIGNAL RECEIVED ******* \n")
+                 + msg.message() + G3TEXT('\n'));
       return out;
    }
 
 
    // helper for fatal exception (windows only)
-   std::string  LogMessage::fatalExceptionToString(const LogMessage& msg) {
-      std::string out; // clear any previous text and formatting
+   TString  LogMessage::fatalExceptionToString(const LogMessage& msg) {
+      TString out; // clear any previous text and formatting
       out.append(msg.timestamp()
-                 + "\n\n***** FATAL EXCEPTION RECEIVED ******* \n"
-                 + msg.message() + '\n');
+                 + G3TEXT("\n\n***** FATAL EXCEPTION RECEIVED ******* \n")
+                 + msg.message() + G3TEXT('\n'));
       return out;
    }
 
 
    // helper for fatal LOG
-   std::string LogMessage::fatalLogToString(const LogMessage& msg) {
+   TString LogMessage::fatalLogToString(const LogMessage& msg) {
       auto out = msg._logDetailsToStringFunc(msg);
-      static const std::string fatalExitReason = {"EXIT trigger caused by LOG(FATAL) entry: "};
-      out.append("\n\t*******\t " + fatalExitReason + "\n\t" + '"' + msg.message() + '"');
+      static const TString fatalExitReason = {G3TEXT("EXIT trigger caused by LOG(FATAL) entry: ")};
+      out.append(G3TEXT("\n\t*******\t ") + fatalExitReason + G3TEXT("\n\t") + G3TEXT('"') + msg.message() + G3TEXT('"'));
       return out;
    }
 
    // helper for fatal CHECK
-   std::string LogMessage::fatalCheckToString(const LogMessage& msg) {
+   TString LogMessage::fatalCheckToString(const LogMessage& msg) {
       auto out = msg._logDetailsToStringFunc(msg);
-      static const std::string contractExitReason = {"EXIT trigger caused by broken Contract:"};
-      out.append("\n\t*******\t " + contractExitReason + " CHECK(" + msg.expression() + ")\n\t"
-                 + '"' + msg. message() + '"');
+      static const TString contractExitReason = {G3TEXT("EXIT trigger caused by broken Contract:")};
+      out.append(G3TEXT("\n\t*******\t ") + contractExitReason + G3TEXT(" CHECK(") + msg.expression() + G3TEXT(")\n\t")
+                 + G3TEXT('"') + msg. message() + G3TEXT('"'));
       return out;
    }
 
    // helper for setting the normal log details in an entry
-   std::string LogMessage::DefaultLogDetailsToString(const LogMessage& msg) {
-      std::string out;
-      out.append(msg.timestamp() + "\t"
+   TString LogMessage::DefaultLogDetailsToString(const LogMessage& msg) {
+      TString out;
+      out.append(msg.timestamp() + G3TEXT("\t")
                  + msg.level() 
-                 + " [" 
+                 + G3TEXT(" [") 
                  + msg.file() 
-                 + "->" 
+                 + G3TEXT("->") 
                  + msg.function() 
-                 + ":" + msg.line() + "]\t");
+                 + G3TEXT(":") + msg.line() + G3TEXT("]\t"));
       return out;
    }
 
 
-   std::string LogMessage::FullLogDetailsToString(const LogMessage& msg) {
-      std::string out;
-      out.append(msg.timestamp() + "\t"
+   TString LogMessage::FullLogDetailsToString(const LogMessage& msg) {
+      TString out;
+      out.append(msg.timestamp() + G3TEXT("\t")
                  + msg.level() 
-                 + " [" 
+                 + G3TEXT(" [") 
                  + msg.threadID() 
-                 + " "
+                 + G3TEXT(" ")
                  + msg.file() 
-                 + "->"+ msg.function() 
-                 + ":" + msg.line() + "]\t");
+                 + G3TEXT("->")+ msg.function() 
+                 + G3TEXT(":") + msg.line() + G3TEXT("]\t"));
       return out;
    }
 
 
    // helper for normal
-   std::string LogMessage::normalToString(const LogMessage& msg) {
+   TString LogMessage::normalToString(const LogMessage& msg) {
       auto out = msg._logDetailsToStringFunc(msg);
-      out.append(msg.message() + '\n');
+      out.append(msg.message() + G3TEXT('\n'));
       return out;
    }
 
@@ -106,7 +106,7 @@ namespace g3 {
 
 
    // Format the log message according to it's type
-   std::string LogMessage::toString(LogDetailsFunc formattingFunc) const {
+   TString LogMessage::toString(LogDetailsFunc formattingFunc) const {
       overrideLogDetailsFunc(formattingFunc);
 
       if (false == wasFatal()) {
@@ -132,14 +132,14 @@ namespace g3 {
 
       // What? Did we hit a custom made level?
       auto out = _logDetailsToStringFunc(*this);
-      static const std::string errorUnknown = {"UNKNOWN or Custom made Log Message Type"};
-      out.append("\t*******" + errorUnknown + "\n\t" + message() + '\n');
+      static const TString errorUnknown = {G3TEXT("UNKNOWN or Custom made Log Message Type")};
+      out.append(G3TEXT("\t*******") + errorUnknown + G3TEXT("\n\t") + message() + G3TEXT('\n'));
       return out;
    }
 
 
 
-   std::string LogMessage::timestamp(const std::string& time_look) const {
+   TString LogMessage::timestamp(const TString& time_look) const {
       return g3::localtime_formatted(to_system_time(_timestamp), time_look);
    }
 
@@ -152,8 +152,8 @@ namespace g3 {
    }
 
 
-   LogMessage::LogMessage(std::string file, const int line,
-                          std::string function, const LEVELS level)
+   LogMessage::LogMessage(TString file, const int line,
+                          TString function, const LEVELS level)
       : _logDetailsToStringFunc(LogMessage::DefaultLogDetailsToString)
       , _timestamp(std::chrono::high_resolution_clock::now())
       , _call_thread_id(std::this_thread::get_id())
@@ -169,8 +169,8 @@ namespace g3 {
    }
 
 
-   LogMessage::LogMessage(const std::string& fatalOsSignalCrashMessage)
-      : LogMessage( {""}, 0, {""}, internal::FATAL_SIGNAL) {
+   LogMessage::LogMessage(const TString& fatalOsSignalCrashMessage)
+      : LogMessage( {G3TEXT("")}, 0, {G3TEXT("")}, internal::FATAL_SIGNAL) {
       _message.append(fatalOsSignalCrashMessage);
    }
 
@@ -202,8 +202,8 @@ namespace g3 {
 
 
 
-   std::string LogMessage::threadID() const {
-      std::ostringstream oss;
+   TString LogMessage::threadID() const {
+      g3::OTStringStream oss;
       oss << _call_thread_id;
       return oss.str();
    }
@@ -223,7 +223,7 @@ namespace g3 {
       return LogMessage(*this);
    }
 
-   std::string FatalMessage::reason() const {
+   TString FatalMessage::reason() const {
       return internal::exitReasonName(_level, _signal_id);
    }
 

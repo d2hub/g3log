@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 /** ==========================================================================
  * 2011 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
  * with no warranties. This code is yours to share, use and modify with no
@@ -80,17 +80,17 @@ namespace g3 {
        auto handle = addDefaultLogger("my_test_log", "/tmp");
        initializeLogging(logworker.get()); // ref. g3log.hpp
 
-       std::future<std::string> log_file_name = sinkHandle->call(&FileSink::fileName);
+       std::future<TString> log_file_name = sinkHandle->call(&FileSink::fileName);
        std::cout << "The filename is: " << log_file_name.get() << std::endl;
        //   something like: /tmp/my_test_log.g3log.20150819-100300.log
        */
-       std::unique_ptr<FileSinkHandle> addDefaultLogger(const std::string& log_prefix, const std::string& log_directory, const std::string& default_id = "g3log");
+       std::unique_ptr<FileSinkHandle> addDefaultLogger(const TString& log_prefix, const TString& log_directory, const TString& default_id = G3TEXT("g3log"));
 
 
 
       /// Adds a sink and returns the handle for access to the sink
       /// @param real_sink unique_ptr ownership is passed to the log worker
-      /// @param call the default call that should receive either a std::string or a LogMessageMover message
+      /// @param call the default call that should receive either a TString or a LogMessageMover message
       /// @return handle to the sink for API access. See usage example below at @ref addDefaultLogger
       template<typename T, typename DefaultLogCall>
       std::unique_ptr<g3::SinkHandle<T>> addSink(std::unique_ptr<T> real_sink, DefaultLogCall call) {

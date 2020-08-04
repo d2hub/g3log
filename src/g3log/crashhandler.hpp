@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 /** ==========================================================================
  * 2011 by KjellKod.cc. This is PUBLIC DOMAIN to use at your own risk and comes
@@ -44,7 +44,7 @@ namespace g3 {
    void restoreSignalHandlerToDefault();
 
 
-   std::string signalToStr(int signal_number);
+   TString signalToStr(int signal_number);
 
    // restore to whatever signal handler was used before signal handler installation 
    void restoreSignalHandler(int signal_number);
@@ -56,9 +56,9 @@ namespace g3 {
    ///     , likely with the original set of signals but with SIGTERM removed
    /// 
    /// call example:
-   ///  g3::overrideSetupSignals({ {SIGABRT, "SIGABRT"}, {SIGFPE, "SIGFPE"},{SIGILL, "SIGILL"},
-   //                          {SIGSEGV, "SIGSEGV"},});
-   void overrideSetupSignals(const std::map<int, std::string> overrideSignals);
+   ///  g3::overrideSetupSignals({ {SIGABRT, G3TEXT("SIGABRT")}, {SIGFPE, G3TEXT("SIGFPE")},{SIGILL, G3TEXT("SIGILL")},
+   //                          {SIGSEGV, G3TEXT("SIGSEGV")},});
+   void overrideSetupSignals(const std::map<int, TString> overrideSignals);
 #endif
 
 
@@ -72,10 +72,10 @@ namespace g3 {
 
       /** \return signal_name Ref: signum.hpp and \ref installSignalHandler
       *  or for Windows exception name */
-      std::string exitReasonName(const LEVELS& level, g3::SignalType signal_number);
+      TString exitReasonName(const LEVELS& level, g3::SignalType signal_number);
 
       /** return calling thread's stackdump*/
-      std::string stackdump(const char* dump = nullptr);
+      TString stackdump(const g3::TCHAR* dump = nullptr);
 
       /** Re-"throw" a fatal signal, previously caught. This will exit the application
        * This is an internal only function. Do not use it elsewhere. It is triggered

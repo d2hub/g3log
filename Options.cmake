@@ -98,6 +98,16 @@ ELSE()
 ENDIF(NOT ENABLE_FATAL_SIGNALHANDLING)
 
 # Option for building as a static or shared library in all platforms
+option (G3_USING_WIDECHAR  "Use wchar_t as basic_string" OFF)
+IF(G3_USING_WIDECHAR)
+   LIST(APPEND G3_DEFINITIONS G3_USING_WIDECHAR)
+
+   message( STATUS "-DG3_USING_WIDECHAR=ON\tUse wchar_t as basic_string" ) 
+ELSE()
+   MESSAGE( STATUS "-DG3_USING_WIDECHAR=OFF\tUse wchar_t as basic_string")  
+ENDIF()
+
+# Option for building as a static or shared library in all platforms
 option (G3_SHARED_LIB  "Build shared library" ON)
 IF(G3_SHARED_LIB)
    message( STATUS "-DG3_SHARED_LIB=ON\tBuild shared library" ) 
